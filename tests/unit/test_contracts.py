@@ -97,17 +97,11 @@ async def test_replay_provider_raises_when_fixture_missing():
         await provider.generate(request)
 
 
-@pytest.mark.asyncio
-async def test_ollama_provider_stub_raises():
-    provider = OllamaProvider()
+def test_ollama_provider_conforms_to_llm_provider():
+    provider = OllamaProvider(host="http://localhost:11434", timeout=30.0)
     assert isinstance(provider, LLMProvider)
-
-    request = LLMRequest(
-        messages=[Message(role="user", content="Hi")],
-        model="ollama-model",
-    )
-    with pytest.raises(NotImplementedError):
-        await provider.generate(request)
+    assert provider.host == "http://localhost:11434"
+    assert provider.timeout == 30.0
 
 
 def test_eval_case_result_and_run_result():

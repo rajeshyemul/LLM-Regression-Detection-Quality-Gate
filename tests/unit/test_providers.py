@@ -131,3 +131,88 @@ async def test_replay_missing_fixture_raises_file_not_found(tmp_path: Path):
 
     with pytest.raises(FileNotFoundError, match="Replay fixture not found"):
         await provider.generate(request)
+
+
+@pytest.mark.asyncio
+async def test_ollama_provider_successful_generate(monkeypatch):
+    import httpx
+    from app.llm.ollama import OllamaProvider
+
+    fake_response_data = {
+        "model": "qwen2.5:3b",
+        "message": {
+            "role": "assistant",
+            "content": '{"category":"billing","summary":"Double charge"}',
+        },
+        "prompt_eval_count": 50,
+        "eval_count": 20,
+        "total_duration": 120000000,
+        "load_duration": 10000000,
+    }
+
+    class MockAsyncClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            pass
+
+        async def post(self, url, json):
+            # Assert payload structure
+            assert url == "http://localhost:11434/api/chat"
+            assert json["model"] == "qwen2.5:3b"
+            assert json["options"]["temperature"] == 0.0
+            assert json["format"] == {"type": "object"}
+            request_obj = httpx.Request("POST", url)
+            return httpx.Response(200, json=fake_response_data, request=request_obj)
+
+    monkeypatch.setattr(httpx, "AsyncClient", MockAsyncClient)
+
+    provider = OllamaProvider(host="http://localhost:11434")
+    request = LLMRequest(
+        messages=[Message(role="user", content="Need refund")],
+        model="qwen2.5:3b",
+        temperature=0.0,
+        response_schema={"type": "object"},
+    )
+    response = await provider.generate(request)
+
+    assert response.provider == "ollama"
+    assert response.model == "qwen2.5:3b"
+    assert response.content == '{"category":"billing","summary":"Double charge"}'
+    assert response.input_tokens == 50
+    assert response.output_tokens == 20
+    assert response.latency_ms > 0
+
+
+@pytest.mark.asyncio
+async def test_ollama_provider_handles_timeout(monkeypatch):
+    import httpx
+    from app.llm.ollama import OllamaProvider, OllamaProviderError
+
+    class MockTimeoutClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            pass
+
+        async def post(self, url, json):
+            raise httpx.TimeoutException("Connection timed out")
+
+    monkeypatch.setattr(httpx, "AsyncClient", MockTimeoutClient)
+
+    provider = OllamaProvider(host="http://localhost:11434", timeout=5.0)
+    request = LLMRequest(
+        messages=[Message(role="user", content="Slow request")],
+        model="qwen2.5:3b",
+    )
+
+    with pytest.raises(OllamaProviderError, match="timed out after 5.0s"):
+        await provider.generate(request)
