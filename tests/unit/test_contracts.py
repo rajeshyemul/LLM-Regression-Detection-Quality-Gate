@@ -85,7 +85,7 @@ async def test_mock_provider_conforms_to_llm_provider():
 
 
 @pytest.mark.asyncio
-async def test_replay_provider_stub_raises():
+async def test_replay_provider_raises_when_fixture_missing():
     provider = ReplayProvider()
     assert isinstance(provider, LLMProvider)
 
@@ -93,7 +93,7 @@ async def test_replay_provider_stub_raises():
         messages=[Message(role="user", content="Hi")],
         model="replay-model",
     )
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(FileNotFoundError):
         await provider.generate(request)
 
 
