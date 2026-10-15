@@ -15,6 +15,9 @@ from app.llm.factory import get_provider
 from app.config.settings import settings
 from datasets.loader import load_golden_dataset
 from app.persistence.run_store import save_run
+from app.persistence.baseline_store import has_baseline, load_baseline
+from app.regression.comparator import compare_runs
+from app.regression.quality_gate import evaluate_quality_gate
 
 console = Console()
 
@@ -38,6 +41,11 @@ def parse_args():
         "--dataset",
         default="datasets/golden/v1.json",
         help="Path to the golden dataset JSON file.",
+    )
+    parser.add_argument(
+        "--baseline",
+        default="baselines/current_baseline.json",
+        help="Path to the current approved baseline JSON file.",
     )
     parser.add_argument(
         "--concurrency",
@@ -150,18 +158,64 @@ async def main():
         )
 
     console.print(table)
+    console.print()
+
+    # ── Regression & Quality Gate Evaluation ───────────────────────
+    console.rule("[bold]Quality Gate & Regression Analysis[/bold]")
+
+    comparison = None
+    if has_baseline(args.baseline):
+        baseline = load_baseline(args.baseline)
+        comparison = compare_runs(result, baseline)
+
+        console.print(f"  Compared against Baseline: [cyan]{baseline.baseline_id}[/cyan] (Run: [dim]{baseline.run_id}[/dim])")
+        console.print(f"  Change Attribution:         [bold]{comparison.change_type}[/bold]")
+        console.print(f"  Details:                    {comparison.attribution_message}")
+        console.print()
+
+        # Deltas
+        acc_d_str = f"{comparison.category_accuracy_delta:+.2%}"
+        acc_d_color = "green" if comparison.category_accuracy_delta >= 0 else "red"
+        console.print(f"  Accuracy Delta:             [{acc_d_color}]{acc_d_str}[/{acc_d_color}]")
+
+        if comparison.average_summary_score_delta is not None:
+            score_d_str = f"{comparison.average_summary_score_delta:+.2f} pts"
+            score_d_color = "green" if comparison.average_summary_score_delta >= 0 else "red"
+            console.print(f"  Summary Score Delta:        [{score_d_color}]{score_d_str}[/{score_d_color}]")
+
+        lat_d_str = f"{comparison.p95_latency_ms_delta:+.1f} ms"
+        lat_d_color = "green" if comparison.p95_latency_ms_delta <= 0 else "yellow"
+        console.print(f"  P95 Latency Delta:          [{lat_d_color}]{lat_d_str}[/{lat_d_color}]")
+        console.print(f"  Regressed Cases (to FAIL):  [red]{len(comparison.regressions)}[/red]")
+        console.print(f"  Improved Cases (to PASS):   [green]{len(comparison.improvements)}[/green]")
+        console.print()
+    else:
+        console.print("  [dim yellow]No baseline found at '{args.baseline}'. Running in standalone mode.[/dim yellow]")
+        console.print()
+
+    # Evaluate Quality Gate
+    gate_result = evaluate_quality_gate(comparison)
+
+    gate_styles = {
+        "PASS": "bold green",
+        "WARNING": "bold yellow",
+        "CRITICAL": "bold red",
+    }
+    status_label = gate_result.status
+    style = gate_styles.get(status_label, "bold white")
+
+    console.print(f"  Decision: [{style}]{status_label}[/{style}]")
+    for reason in gate_result.reasons:
+        console.print(f"    • {reason}")
+    console.print()
 
     # ── Exit Code ──────────────────────────────────────────────────
-    # Quality gate thresholds
-    if result.category_accuracy < (1.0 - settings.critical_accuracy_delta):
-        console.print("[bold red]CRITICAL: Accuracy below critical threshold.[/bold red]")
-        sys.exit(2)
-    elif result.category_accuracy < (1.0 - settings.warning_accuracy_delta):
-        console.print("[bold yellow]WARNING: Accuracy below warning threshold.[/bold yellow]")
-        sys.exit(1)
-    else:
-        console.print("[bold green]PASS: Quality gate passed.[/bold green]")
-        sys.exit(0)
+    exit_codes = {
+        "PASS": 0,
+        "WARNING": 1,
+        "CRITICAL": 2,
+    }
+    sys.exit(exit_codes.get(gate_result.status, 2))
 
 
 if __name__ == "__main__":
