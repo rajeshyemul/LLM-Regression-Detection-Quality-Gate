@@ -14,6 +14,7 @@ from app.feature.prompt_loader import load_prompt
 from app.llm.factory import get_provider
 from app.config.settings import settings
 from datasets.loader import load_golden_dataset
+from app.persistence.run_store import save_run
 
 console = Console()
 
@@ -85,6 +86,10 @@ async def main():
             execution_mode=args.mode,
             concurrency=args.concurrency,
         )
+        
+    saved_path = save_run(result)
+    console.print(f"  Run evidence saved to: [dim]{saved_path}[/dim]")
+    console.print()
 
     # ── Summary Scorecard ──────────────────────────────────────────
     console.rule("[bold]Evaluation Summary[/bold]")

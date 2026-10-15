@@ -1,0 +1,595 @@
+{
+  "baseline_id": "BASE-832A426B",
+  "run_id": "RUN-995B3BE9",
+  "prompt_version": "v1.0",
+  "dataset_version": "v1.0",
+  "model_provider": "mock",
+  "model_name": "qwen2.5:3b",
+  "judge_provider": null,
+  "judge_model": null,
+  "metrics": {
+    "total_cases": 30,
+    "passed_cases": 8,
+    "failed_cases": 22,
+    "category_accuracy": 0.2667,
+    "average_summary_score": null,
+    "average_latency_ms": 0.0,
+    "p50_latency_ms": 0.0,
+    "p95_latency_ms": 0.01,
+    "average_input_tokens": 10.0,
+    "average_output_tokens": 10.0
+  },
+  "case_results": [
+    {
+      "test_case_id": "TC-001",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer requests refund for duplicate $49 charge on invoice #1089."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": true,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.008499999239575118,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-002",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer requests official VAT invoice for recent annual subscription purchase."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": true,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.00404199818149209,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-003",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer inquires how to update expired credit card to resume paused subscription."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": true,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.002458997187204659,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-004",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer inquires about missing $180 prorated credit following an enterprise downgrade."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": true,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0025410045054741204,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-005",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer disputes an unexpected 15% price increase on their monthly invoice."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": true,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0023329994291998446,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-006",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer is blocked from paying invoice due to a billing portal redirect error."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": true,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0023749962565489113,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-007",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer requests immediate refund for a duplicate credit card charge."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": true,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.003625005774665624,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-008",
+      "expected": {
+        "category": "billing",
+        "summary": "Customer requests application of 501(c)(3) tax-exempt nonprofit discount to upcoming renewal."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": true,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0022090025595389307,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-009",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer reports a 500 Internal Server Error when exporting analytics data to CSV."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.00224999530473724,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-010",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer reports iOS 18 app crash immediately upon launch on iPhone 15 Pro."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.005709000106435269,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-011",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer reports webhook delivery stoppage starting at 03:00 UTC despite healthy receiver."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.002749999111983925,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-012",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer reports unexpected HTTP 429 rate limit errors below configured traffic threshold."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0023329994291998446,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-013",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer provides JavaScript stack trace error occurring in app.js."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.002291002601850778,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-014",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer reports React runtime error #130 during checkout when choosing ACH payment."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.007000002369750291,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-015",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer sarcastically complains about unexpected weekly production database restarts."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0062920007621869445,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-016",
+      "expected": {
+        "category": "technical",
+        "summary": "Customer reports severe search latency and intermittent gateway timeout errors."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.005707996024284512,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-017",
+      "expected": {
+        "category": "account",
+        "summary": "Customer reports not receiving password reset emails after multiple attempts."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0029999937396496534,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-018",
+      "expected": {
+        "category": "account",
+        "summary": "Customer lost 2FA device due to theft and requests account recovery assistance."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0022500025806948543,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-019",
+      "expected": {
+        "category": "account",
+        "summary": "Customer requests assistance changing organization admin email following domain change."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.002125001628883183,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-020",
+      "expected": {
+        "category": "account",
+        "summary": "Customer requests immediate account revocation and session termination for departing employee."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0024170003598555923,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-021",
+      "expected": {
+        "category": "account",
+        "summary": "Customer suspects account compromise due to unrecognized login and requests immediate session lockout."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0022500025806948543,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-022",
+      "expected": {
+        "category": "account",
+        "summary": "Customer reports being unable to access account due to an expired password reset token."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.001957996573764831,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-023",
+      "expected": {
+        "category": "account",
+        "summary": "Customer inquires how to enable mandatory Okta SSO for domain users in settings."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0021659943740814924,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-024",
+      "expected": {
+        "category": "general",
+        "summary": "Customer inquires about SOC-2 Type II compliance and requests audit report under NDA."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0020000006770715117,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-025",
+      "expected": {
+        "category": "general",
+        "summary": "Agency expresses interest in joining the solution partner or affiliate program."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.002625005436129868,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-026",
+      "expected": {
+        "category": "general",
+        "summary": "Customer requests dark mode support for the web dashboard."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.002082997525576502,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-027",
+      "expected": {
+        "category": "general",
+        "summary": "Customer sends positive feedback regarding the recent search filter release."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0020840016077272594,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-028",
+      "expected": {
+        "category": "general",
+        "summary": "Customer asks about support operating hours and 24/7 availability for standard tiers."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.002040993422269821,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-029",
+      "expected": {
+        "category": "general",
+        "summary": "Customer asks whether HubSpot integration is supported on standard or enterprise tiers."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0023750035325065255,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    },
+    {
+      "test_case_id": "TC-030",
+      "expected": {
+        "category": "general",
+        "summary": "Customer submits an adversarial prompt injection attempt."
+      },
+      "actual": {
+        "category": "billing",
+        "summary": "Customer reports a duplicate charge."
+      },
+      "category_match": false,
+      "summary_score": null,
+      "summary_reason": null,
+      "latency_ms": 0.0022500025806948543,
+      "input_tokens": 10,
+      "output_tokens": 10,
+      "status": "FAIL",
+      "error": null
+    }
+  ],
+  "created_at": "2026-10-15T09:21:47.031429Z"
+}
