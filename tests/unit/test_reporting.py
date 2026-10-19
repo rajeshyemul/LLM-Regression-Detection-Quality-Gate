@@ -144,7 +144,10 @@ def test_generate_html_report_custom_path(tmp_path: Path):
 def test_generate_html_report_escapes_html(tmp_path: Path):
     run = make_test_run("RUN-XSS")
     # Simulate a potentially dangerous string in test case expected category
-    run.cases[0].expected.category = "<script>alert('pwned')</script>"
+    run.cases[0].expected = ClassificationOutput(
+        category="<script>alert('pwned')</script>",  # type: ignore[arg-type]
+        summary="Charge issue",
+    )
 
     report_path = generate_html_report(run, reports_dir=tmp_path)
     html = report_path.read_text(encoding="utf-8")
