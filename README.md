@@ -16,8 +16,8 @@ Testing traditional software relies on deterministic assertions: `assert add(2, 
 Testing LLM-powered features is fundamentally different:
 1. **Multi-Dimensional Quality**: A prompt change might improve category accuracy from 85% to 92% (functional improvement), but silently cause summaries to hallucinate (semantic regression) and increase P95 latency by 1.5s (operational regression).
 2. **Hidden Degradation**: LLM updates rarely break everything at once; they break edge cases, languages, or specific intent boundaries silently.
-3. **Change Attribution Confusion**: If both the prompt and the model weights change at the same time, attributing why accuracy shifted becomes mathematically untrackable without disciplined regression diffing.
-4. **CI/CD Flakiness & Cloud Cost**: Calling cloud APIs (OpenAI/Anthropic) in pull request checks introduces network flakiness, rate limits, and massive recurring costs.
+3. **Causal Attribution Limitation**: When both the prompt and the model weights change simultaneously, the system can identify that both changed, but cannot reliably determine which change caused the observed quality shift.
+4. **CI/CD Flakiness & Cloud Cost**: Calling cloud APIs in pull request checks introduces network flakiness, rate limits, and recurring cloud costs.
 
 This platform solves these problems with a **local-first, deterministic-first architecture**:
 * Evaluates across **Functional**, **Semantic**, and **Operational** dimensions.
@@ -94,7 +94,7 @@ class LLMProvider(ABC):
     async def generate(self, request: LLMRequest) -> LLMResponse: ...
 ```
 
-* **`--mode real` (Local Inference)**: Calls a local Ollama daemon (`qwen2.5:3b`) over async HTTP with zero cloud costs and 100% data privacy.
+* **`--mode real` (Local Inference)**: Calls a local Ollama daemon (`qwen2.5:3b`) with no external LLM API dependency, allowing sensitive evaluation data to remain within the local/private execution environment.
 * **`--mode mock` (Deterministic Testing)**: Instant in-memory test double for testing pipeline plumbing, CLI behaviors, and quality gate triggers.
 * **`--mode replay` (Deterministic CI)**: SHA-256 content-addressed fixture cache. If an identical prompt/model request was previously recorded, it replays instantly with zero network calls.
 
@@ -133,7 +133,7 @@ llm-regression-detection/
 │       └── templates/      # Modern dark-theme report template
 ├── baselines/              # Committed source-of-truth baseline JSONs
 ├── datasets/               # Human-verified golden datasets & loader
-│   ├── golden/v1.json      # 30 curated test cases across 4 difficulty tiers
+│   ├── golden/v1.json      # 30 curated cases (4 categories, 7 test profiles)
 │   └── loader.py           # Dataset loader, stats & filtering
 ├── prompts/                # Versioned prompt templates (v1.yaml)
 ├── results/                # Output artifacts (ignored in git)
@@ -198,15 +198,21 @@ pytest tests/unit/ -v
 
 ---
 
-## 7. Quality Gate & CI/CD Exit Codes
+## 7. Quality Gate Policy & Thresholds
 
-The platform acts as a strict CI/CD gatekeeper:
+The Quality Gate evaluates multi-dimensional deltas ($\text{Current} - \text{Baseline}$) against configurable thresholds:
 
-| Status | Exit Code | Trigger Conditions |
-| :--- | :---: | :--- |
-| **`PASS`** | `0` | All metric deltas within warning limits, 0 case regressions. |
-| **`WARNING`** | `1` | Category accuracy drop $\in [-3\%, -5\%)$, or 1–2 case regressions, or P95 latency $+20\% \dots +50\%$, or no baseline reference exists. |
-| **`CRITICAL`** | `2` | Category accuracy drop $\ge 5\%$, or $>2$ case regressions, or P95 latency inflated $>50\%$. |
+| Quality Dimension | Metric Condition | Warning Threshold | Critical Threshold |
+| :--- | :--- | :---: | :---: |
+| **Functional** | Category accuracy delta | $\le -3.0\%$ | $\le -5.0\%$ |
+| **Functional** | PASS $\rightarrow$ FAIL case regressions | $\ge 1$ case | $\ge 3$ cases |
+| **Semantic** | Summary judge score delta | $\le -0.20$ pts | $\le -0.40$ pts |
+| **Operational** | P95 latency percentage increase | $\ge +20\%$ | $\ge +50\%$ |
+
+### Severity Escalation & CI Exit Codes
+* **`CRITICAL` (Exit code `2`)**: Any single critical threshold is breached.
+* **`WARNING` (Exit code `1`)**: No critical breach exists, but one or more warning thresholds are breached (or no approved baseline exists).
+* **`PASS` (Exit code `0`)**: All metrics are within acceptable policy limits with zero case regressions.
 
 ---
 
@@ -216,7 +222,7 @@ The platform acts as a strict CI/CD gatekeeper:
 | :---: | :--- | :---: | :--- |
 | **0** | Foundation & Architecture | ✅ Done | Core Pydantic contracts, Provider factory, Settings. |
 | **1** | LLM Feature Under Test | ✅ Done | Versioned YAML prompt loader, Customer support email classifier. |
-| **2** | Golden Dataset | ✅ Done | 30 curated test cases (Easy, Medium, Hard, Ambiguous, Adversarial). |
+| **2** | Golden Dataset | ✅ Done | 30 curated test cases across 4 categories and 7 test profiles. |
 | **3** | Evaluation Engine | ✅ Done | Deterministic metrics, P50/P95 latency, LLM-as-a-judge, Batch runner. |
 | **4** | Persistence | ✅ Done | Complete run evidence persistence (`results/runs/`), Baseline promotion. |
 | **5** | Regression Engine | ✅ Done | Case-level diffs (`PASS` $\leftrightarrow$ `FAIL`), 4-way change attribution. |

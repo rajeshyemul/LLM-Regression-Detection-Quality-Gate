@@ -143,13 +143,13 @@ def test_generate_html_report_custom_path(tmp_path: Path):
 
 def test_generate_html_report_escapes_html(tmp_path: Path):
     run = make_test_run("RUN-XSS")
-    # Simulate a potentially dangerous string in test case expected category
-    run.cases[0].expected = ClassificationOutput(
-        category="<script>alert('pwned')</script>",  # type: ignore[arg-type]
-        summary="Charge issue",
+    # Simulate a potentially dangerous string in gate reasons
+    gate = QualityGateResult(
+        status="WARNING",
+        reasons=["<script>alert('pwned')</script>"],
     )
 
-    report_path = generate_html_report(run, reports_dir=tmp_path)
+    report_path = generate_html_report(run, gate=gate, reports_dir=tmp_path)
     html = report_path.read_text(encoding="utf-8")
 
     # Jinja2 autoescape must escape raw HTML tags
