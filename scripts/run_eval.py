@@ -18,6 +18,7 @@ from app.persistence.run_store import save_run
 from app.persistence.baseline_store import has_baseline, load_baseline
 from app.regression.comparator import compare_runs
 from app.regression.quality_gate import evaluate_quality_gate
+from app.reporting.html_report import generate_html_report
 
 console = Console()
 
@@ -52,6 +53,11 @@ def parse_args():
         type=int,
         default=5,
         help="Maximum number of concurrent evaluation requests.",
+    )
+    parser.add_argument(
+        "--reports-dir",
+        default="results/reports",
+        help="Directory where HTML reports are saved.",
     )
     return parser.parse_args()
 
@@ -190,7 +196,7 @@ async def main():
         console.print(f"  Improved Cases (to PASS):   [green]{len(comparison.improvements)}[/green]")
         console.print()
     else:
-        console.print("  [dim yellow]No baseline found at '{args.baseline}'. Running in standalone mode.[/dim yellow]")
+        console.print(f"  [dim yellow]No baseline found at '{args.baseline}'. Running in standalone mode.[/dim yellow]")
         console.print()
 
     # Evaluate Quality Gate
@@ -207,6 +213,16 @@ async def main():
     console.print(f"  Decision: [{style}]{status_label}[/{style}]")
     for reason in gate_result.reasons:
         console.print(f"    • {reason}")
+    console.print()
+
+    # ── Generate HTML Report ───────────────────────────────────────
+    report_path = generate_html_report(
+        run=result,
+        comparison=comparison,
+        gate=gate_result,
+        reports_dir=args.reports_dir,
+    )
+    console.print(f"  HTML Report: [bold cyan]file://{report_path.resolve()}[/bold cyan]")
     console.print()
 
     # ── Exit Code ──────────────────────────────────────────────────

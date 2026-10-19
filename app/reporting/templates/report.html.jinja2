@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evaluation Report — {{ run.manifest.run_id }}</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --green: #10b981;
+      --green-bg: rgba(16, 185, 129, 0.1);
+      --yellow: #f59e0b;
+      --yellow-bg: rgba(245, 158, 11, 0.1);
+      --red: #ef4444;
+      --red-bg: rgba(239, 68, 68, 0.1);
+      --blue: #3b82f6;
+      --blue-bg: rgba(59, 130, 246, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 2rem;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+    h1 { font-size: 1.75rem; font-weight: 700; }
+    .subtitle { color: var(--text-muted); font-size: 0.875rem; }
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-PASS { background-color: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+    .badge-WARNING { background-color: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow); }
+    .badge-CRITICAL, .badge-FAIL, .badge-ERROR { background-color: var(--red-bg); color: var(--red); border: 1px solid var(--red); }
+    
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem; }
+    .stat-delta { font-size: 0.85rem; margin-left: 0.35rem; }
+    .delta-pos { color: var(--green); }
+    .delta-neg { color: var(--red); }
+    .delta-neutral { color: var(--text-muted); }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem; }
+    th {
+      background-color: rgba(15, 23, 42, 0.5);
+      color: var(--text-muted);
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+    tr:hover { background-color: rgba(51, 65, 85, 0.3); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>LLM Quality & Regression Report</h1>
+        <div class="subtitle">Run ID: <span class="mono">{{ run.manifest.run_id }}</span> &bull; Generated: {{ run.manifest.started_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</div>
+      </div>
+      <div>
+        {% if gate %}
+          <span class="badge badge-{{ gate.status }}">{{ gate.status }}</span>
+        {% else %}
+          <span class="badge badge-PASS">EVAL COMPLETE</span>
+        {% endif %}
+      </div>
+    </header>
+
+    {% if gate and gate.reasons %}
+    <div class="card" style="border-left: 4px solid {% if gate.status == 'PASS' %}var(--green){% elif gate.status == 'WARNING' %}var(--yellow){% else %}var(--red){% endif %};">
+      <div class="card-title">Quality Gate Decision: {{ gate.status }}</div>
+      <ul style="padding-left: 1.25rem; font-size: 0.9rem;">
+        {% for reason in gate.reasons %}
+          <li>{{ reason }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- Configuration & Attribution -->
+    <div class="grid" style="margin-bottom: 1.5rem;">
+      <div class="card" style="margin-bottom: 0;">
+        <div class="card-title">Run Configuration</div>
+        <p><strong>Prompt:</strong> {{ run.manifest.prompt_version }}</p>
+        <p><strong>Dataset:</strong> {{ run.manifest.dataset_version }} ({{ run.total_cases }} cases)</p>
+        <p><strong>Model:</strong> {{ run.manifest.model_name }} ({{ run.manifest.model_provider }})</p>
+        <p><strong>Mode:</strong> {{ run.manifest.execution_mode }}</p>
+      </div>
+
+      <div class="card" style="margin-bottom: 0;">
+        <div class="card-title">Baseline Comparison</div>
+        {% if comparison %}
+          <p><strong>Baseline ID:</strong> <span class="mono">{{ comparison.baseline_id }}</span></p>
+          <p><strong>Change Type:</strong> <span class="badge badge-PASS" style="font-size: 0.75rem;">{{ comparison.change_type }}</span></p>
+          <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">{{ comparison.attribution_message }}</p>
+        {% else %}
+          <p style="color: var(--text-muted); font-style: italic;">No baseline reference provided. Running in standalone evaluation mode.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- 3-Dimension Scorecards -->
+    <div class="grid" style="margin-bottom: 1.5rem;">
+      <div class="card" style="margin-bottom: 0;">
+        <div class="stat-label">Functional (Accuracy)</div>
+        <div class="stat-value">
+          {{ "%.1f"|format(run.category_accuracy * 100) }}%
+          {% if comparison %}
+            {% set d = comparison.category_accuracy_delta * 100 %}
+            <span class="stat-delta {% if d > 0 %}delta-pos{% elif d < 0 %}delta-neg{% else %}delta-neutral{% endif %}">
+              {{ "%+.1f"|format(d) }}%
+            </span>
+          {% endif %}
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+          {{ run.passed_cases }} passed / {{ run.failed_cases }} failed
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 0;">
+        <div class="stat-label">Semantic (Judge Score)</div>
+        <div class="stat-value">
+          {% if run.average_summary_score %}
+            {{ "%.2f"|format(run.average_summary_score) }} <span style="font-size: 1rem; color: var(--text-muted);">/ 5.0</span>
+            {% if comparison and comparison.average_summary_score_delta is not none %}
+              {% set sd = comparison.average_summary_score_delta %}
+              <span class="stat-delta {% if sd > 0 %}delta-pos{% elif sd < 0 %}delta-neg{% else %}delta-neutral{% endif %}">
+                {{ "%+.2f"|format(sd) }}
+              </span>
+            {% endif %}
+          {% else %}
+            <span style="color: var(--text-muted); font-size: 1.25rem;">N/A</span>
+          {% endif %}
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Summary relevance</div>
+      </div>
+
+      <div class="card" style="margin-bottom: 0;">
+        <div class="stat-label">Operational (P95 Latency)</div>
+        <div class="stat-value">
+          {{ "%.1f"|format(run.p95_latency_ms) }} ms
+          {% if comparison %}
+            {% set ld = comparison.p95_latency_ms_delta %}
+            <span class="stat-delta {% if ld < 0 %}delta-pos{% elif ld > 0 %}delta-neg{% else %}delta-neutral{% endif %}">
+              {{ "%+.1f"|format(ld) }} ms
+            </span>
+          {% endif %}
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Avg: {{ "%.1f"|format(run.average_latency_ms) }} ms &bull; Tokens: {{ "%.0f"|format(run.average_input_tokens) }} in / {{ "%.0f"|format(run.average_output_tokens) }} out
+        </div>
+      </div>
+    </div>
+
+    <!-- Regressions & Improvements Highlight -->
+    {% if comparison and (comparison.regressions or comparison.improvements) %}
+      {% if comparison.regressions %}
+      <div class="card" style="border-left: 4px solid var(--red);">
+        <div class="card-title" style="color: var(--red);">Regressions (Passed in Baseline, Failed in Current Run)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Expected</th>
+              <th>Baseline Category</th>
+              <th>Current Category</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in comparison.regressions %}
+            <tr>
+              <td class="mono"><strong>{{ r.test_case_id }}</strong></td>
+              <td>{{ r.expected_category }}</td>
+              <td><span class="badge badge-PASS">{{ r.baseline_category }}</span></td>
+              <td><span class="badge badge-FAIL">{{ r.current_category }}</span></td>
+              <td>{{ r.reason }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+      {% if comparison.improvements %}
+      <div class="card" style="border-left: 4px solid var(--green);">
+        <div class="card-title" style="color: var(--green);">Improvements (Failed in Baseline, Passed in Current Run)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Expected</th>
+              <th>Baseline Category</th>
+              <th>Current Category</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for imp in comparison.improvements %}
+            <tr>
+              <td class="mono"><strong>{{ imp.test_case_id }}</strong></td>
+              <td>{{ imp.expected_category }}</td>
+              <td><span class="badge badge-FAIL">{{ imp.baseline_category }}</span></td>
+              <td><span class="badge badge-PASS">{{ imp.current_category }}</span></td>
+              <td>{{ imp.reason }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    {% endif %}
+
+    <!-- All Case Results Table -->
+    <div class="card">
+      <div class="card-title">All Test Cases ({{ run.cases|length }})</div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Expected Category</th>
+            <th>Actual Category</th>
+            <th>Status</th>
+            <th>Summary Score</th>
+            <th>Latency</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in run.cases %}
+          <tr>
+            <td class="mono">{{ c.test_case_id }}</td>
+            <td>{{ c.expected.category }}</td>
+            <td>{{ c.actual.category if c.actual else "—" }}</td>
+            <td><span class="badge badge-{{ c.status }}">{{ c.status }}</span></td>
+            <td>{{ "%.1f"|format(c.summary_score) if c.summary_score else "—" }}</td>
+            <td>{{ "%.1f"|format(c.latency_ms) }} ms</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</body>
+</html>
